@@ -1,18 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <style>
-        body {
-            background-color: #000;
-            color: #fff;
-        }
-    </style>
-    
-</head>
-<body>
-    <h1>test template</h1>
-</body>
-</html>
+{% extends "layout.html" %}
+
+{% block title %}
+lets tweet
+{% endblock %}
+
+{% block content %}
+
+<h1 class="text-center mt-4">Welcome to Lets Tweet Django Project</h1>
+
+{% endblock %}
