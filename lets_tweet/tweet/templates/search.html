@@ -1,0 +1,43 @@
+{% extends "layout.html" %}
+
+{% block title %}Search Tweets{% endblock %}
+
+{% block content %}
+<h1 class="text-center mt-4">Welcome to Tweet App</h1>
+
+<h2 class="text-center mt-4">Search Tweets</h2>
+
+<form method="get" class="form-inline d-flex justify-content-center mt-3">
+    <input 
+        type="text" 
+        name="q" 
+        class="form-control mr-2" 
+        placeholder="Search tweets..." 
+        value="{{ query|default:'' }}">
+    <button class="btn btn-warning" type="submit">Search</button>
+</form>
+
+<div class="text-center mt-3">
+    <a href="{% url 'tweet_list' %}" class="btn btn-secondary">Back to Home</a>
+</div>
+
+<h3 class="text-center mt-5">Search Results</h3>
+<p>Search Query: {{ query }}</p>
+<p>Results Count: {{ results|length }}</p>
+
+{% if results %}
+    <ul class="list-group mt-3 mx-auto" style="max-width: 600px;">
+        {% for tweet in results %}
+            <li class="list-group-item">
+                <strong>{{ tweet.user.username }}</strong>: {{ tweet.text }}
+                {% if tweet.photo %}
+                    <div><img src="{{ tweet.photo.url }}" alt="Tweet photo" style="max-width: 100%; height: auto;"></div>
+                {% endif %}
+                <p class="text-muted">Posted on {{ tweet.created_at }}</p>
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p class="text-center mt-4 text-muted">No tweets found.</p>
+{% endif %}
+{% endblock %}
