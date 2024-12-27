@@ -207,6 +207,7 @@ urlpatterns = [
 ]
 ------------------------------------------------------------------------------------------
 now we will work on required templates:
+create these templates in templates folder in your app directory
 1. tweet_list.html
 2. tweet_form.html
 3. tweet_confirm_delete.html
@@ -267,8 +268,134 @@ lets tweet
 {% endblock %}
 ---------------------------------------------------------------------------------
 ### 3. tweet_confirm_delete.html
+{% extends "layout.html" %}
+{% block title %}Lets Tweet{% endblock %}
+{% block content %}
+<h1 class="text-center mt-4">Welcome to Tweet App</h1>
+<h2>Are you sure you want to delete this tweet?</h2>
+<form method="post">
+{% csrf_token %}
+\begin{itemize}
+\item <button type="submit" class="btn btn-danger">Yes, delete it</button
+\item <a href="{% url 'tweet_list' %}" class="btn btn-primary">
+No, go back
+</a>
+\end{itemize}
+\end{form}
+---------------------------------------------------------------------------------
+lets work on user registration and login and logout
+---------------------------------------------------------------------------------
+-----------------------add to forms.py-------------------------------------
+
+from django.contrib.auth.forms import UserCreationForm
+
+class UserRegistrationForm(UserCreationForm):
+  email = forms.EmailField()
+  class Meta:
+    model = User
+    fields = ('username', 'email', 'password1', 'password2')
+
+-----------------------add to views.py-------------------------------------
+from .forms import TweetForm, UserRegistrationForm
+from django.contrib.auth import login, authenticate, logout
+
+def register(request):
+  if request.method == 'POST':
+    form = UserRegistrationForm(request.POST)
+    if form.is_valid():
+      user = form.save(commit=False)
+      user.set_password(form.cleaned_data['password1'])
+      user.save()
+      return redirect('login') #for automatic login "login(request,user)" or u can redirect to any page like 'tweet_list'
+  else:
+    form = UserRegistrationForm()
+  return render(request, 'registration/register.html', {'form': form})
+----------------------------------------------
+-----------------------add to urls.py-------------------------------------
+urlpatterns = [
+    path('register/', views.register, name='register'),
+]
+
+but this wont work untill we add the following to settings.py
+-----------------------add to settings.py-------------------------------------
+LOGIN_URL = '/accounts/login'
+
+LOGIN_REDIRECT_URL = '/tweet/'
+LOGOUT_REDIRECT_URL = '/tweet/'
+
+modification also required in main urls.py
+-----------------------add to main urls.py-------------------------------------
+
+from django.contrib.auth.urls import views as auth_views
+
+urlpatterns = [
+  path('accounts/', include('django.contrib.auth.urls')),
+]
+-------------------------------------------------------------------------------
+now lets work on html files required for registration and login;
+
+registration related html files should be stored in outer directory of project "lets_tweet\templates\registration" because authentication is not a part of app it's handled by the django.
+so keep them created:
+-----------------------register.html----------------------------------
+{% extends 'layout.html' %}
+{% block content %} 
+<h2>Register Form</h2>
+<form method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button class="btn btn-primary" type="submit">Register</button>
+</form>
+
+{% endblock %}
+-----------------------login.html-------------------------------------
+{% extends 'layout.html' %}
+
+{% block content %} 
+<h2>Login Form</h2>
+<form method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button class="btn btn-primary" type="submit">Login</button>
+</form>
+
+<p>Dont have an account? <a href="{% url 'register' %}">Register here</a></p
+
+{% endblock %}
+
+-----------------------logged_out.html.html---------------------------
+{% extends 'layout.html' %}
+{% block content %} 
+<h2>Logged out</h2>
 
 
+<p>You have been Logged out! <a href="{% url 'login' %}">Login again</a></p
+
+{% endblock %}
+-------------------------------------------------------------------------------
+now lets modify layout.html to include home and logout buttons
+<form class="d-flex" role="search">
+            </form>
+            <a class="btn btn-primary mx-2" href="{% url 'tweet_list' %}">Tweet Home</a>
+            {% if user.is_authenticated %}
+            <form method="post" action="{% url 'logout' %}">
+              {% csrf_token %}
+              <button class="btn btn-danger" type="submit">Logout</button>
+
+            </form>
+            {% else %}
+            <a class="btn btn-primary mx-2" href="{% url 'register' %}">Register</a>
+            <a class="btn btn-success mx-2" href="{% url 'login' %}">Login</a>
+            {% endif %}
+          </div>
 
 
+-------------------------------------------------------------------------------
+user- sumeet
+password- 12345
 
+user- virat
+password- v@123456
+
+user- amit
+password- amit@123
+-------------------------------------------------------------------------------
