@@ -31,6 +31,7 @@ Password: 12345
 Password (again): 12345
 ------------------------------------------------------------------
 some basic settings we will add in settings.py file:
+
 import os
 
 TEMPLATES = [
@@ -99,11 +100,16 @@ urlpatterns = [
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 -----------------------------------------------------------------------
 now we will work on layout.html:
+
 so create a new file in templates directory(project folder) named layout.html
+
 add {% load static %} at the top of the file
 add {% block content %} and {% endblock %} to the file
+
 copy and paste css link from bootstrap cdn in the layout.html file
-inject the layout.html file in the index.html file {% extends "layout.html" %}
+
+inject the layout.html file in the index.html file 
+{% extends "layout.html" %}
 copy paste navbar code from bootstrap documentation in the layout.html file
 add <html lang="en" data-bs-theme="dark"> for dark mode
 ----------------------------------------------------------------------------------------
@@ -121,7 +127,7 @@ class Tweet(models.Model):
 
    def __str__(self): #it is useful for whenever we integrate this in Admin, it will give us the demo/url from this class which can be used to see fields of the model/class which can be modified.
      return f'{self.user.username} - {self.text[:10]}'
-------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------
 #python -m pip install Pillow (for imagefield)
 
 make migrations and migrate
@@ -399,3 +405,104 @@ password- v@123456
 user- amit
 password- amit@123
 -------------------------------------------------------------------------------
+now we will work on handling multiple roles in authentication system
+
+We'll create roles (groups) using a management command.
+
+Navigate to Your App Directory
+cd tweet
+Create the Directory Structure: If the management and commands directories don’t exist, create them:
+mkdir -p management/commands
+------------------------------------------------------------------------------------------
+Add an __init__.py File: Add an empty __init__.py file in both the management and commands directories. This makes them Python packages.
+
+1. Using PowerShell,
+New-Item -ItemType File -Path management\__init__.py
+New-Item -ItemType File -Path management\commands\__init__.py
+2. Using Command Prompt,
+echo. > management\__init__.py
+echo. > management\commands\__init__.py
+                                 OR
+3. Using Python to Create the File,
+Run this Python script from the root of your Django project to create the file:
+
+import os
+
+# Define paths
+paths = [
+    'lets_tweet/management/__init__.py',
+    'lets_tweet/management/commands/__init__.py'
+]
+
+# Create directories and files
+for path in paths:
+    os.makedirs(os.path.dirname(path), exist_ok=True)  # Create directories if not exist
+    with open(path, 'w'):  # Create empty file
+        pass
+
+print("Directories and files created successfully.")
+
+------------------------------------------------------------------------------------------
+Create the create_roles.py Command: Create the create_roles.py file in the commands directory:
+
+1. Using PowerShell,
+New-Item -ItemType File -Path management/commands/create_roles.py
+
+2. Using Command Prompt,
+Command Prompt does not have a direct touch equivalent. Instead, use the echo command to create the file:
+echo. > management/commands/create_roles.py
+
+3. Using Python to Create the File,
+Run this Python script from the root of your Django project to create the file:
+import os
+
+# Define the file path
+file_path = 'management/commands/create_roles.py'
+
+# Create directories if they don't exist
+os.makedirs(os.path.dirname(file_path), exist_ok=True)
+
+# Create an empty file
+with open(file_path, 'w') as file:
+    pass
+
+print(f"File '{file_path}' created successfully.")
+
+4. Using a Code Editor
+If you prefer to avoid the command line:
+
+. Open your project in an editor like VS Code or PyCharm.
+. Navigate to the management/commands directory.
+. Right-click and choose "New File."
+. Name the file create_roles.py.
+------------------------------------------------------------------------------------------
+Write the Code: Add the role creation code to create_roles.py:
+
+from django.core.management.base import BaseCommand
+from django.contrib.auth.models import Group
+
+class Command(BaseCommand):
+    help = 'Create default roles'
+
+    def handle(self, *args, **kwargs):
+        roles = ['Admin', 'Manager', 'Employee']
+        for role in roles:
+            group, created = Group.objects.get_or_create(name=role)
+            if created:
+                self.stdout.write(self.style.SUCCESS(f'Role "{role}" created.'))
+            else:
+                self.stdout.write(self.style.WARNING(f'Role "{role}" already exists.'))
+        self.stdout.write(self.style.SUCCESS('Roles setup complete!')) 
+------------------------------------------------------------------------------------------
+Run the Command: Once the file is set up, you can run the command:
+python manage.py create_roles
+------------------------------------------------------------------------------------------
+Verifying Roles in the Admin Panel
+After running the command, check the Groups section in the Django admin panel:
+
+1. Log in to the admin panel (/admin).
+2. Go to Authentication and Authorization > Groups.
+3. You should see the roles (Admin, Manager, Employee) created.
+------------------------------------------------------------------------------------------
+
+
